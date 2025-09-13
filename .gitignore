@@ -1,0 +1,6 @@
+*.pdf
+*.docx
+*.jar
+*.class
+out/
+docs/
