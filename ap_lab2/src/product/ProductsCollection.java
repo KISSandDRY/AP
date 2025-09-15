@@ -1,15 +1,16 @@
 package product;
 
+import java.util.List;
 import java.util.ArrayList;
 
 public class ProductsCollection {
-    private ArrayList<Product> products;
+    private List<Product> products;
 
     public ProductsCollection() {
-        products = new ArrayList<Product>();
+        products = new ArrayList<>();
     }
 
-    public ProductsCollection(ArrayList<Product> products) {
+    public ProductsCollection(List<Product> products) {
         this.products = products;
     }
 
@@ -20,7 +21,7 @@ public class ProductsCollection {
     }
 
     public ProductsCollection getPriceLE(double price) {
-        ArrayList<Product> res = new ArrayList<Product>();
+        List<Product> res = new ArrayList<>();
 
         for (Product p : products) 
             if (p.getPrice() <= price)
@@ -30,7 +31,7 @@ public class ProductsCollection {
     }
 
     public ProductsCollection getCategory(String category) {
-        ArrayList<Product> res = new ArrayList<Product>();
+        List<Product> res = new ArrayList<>();
 
         for (Product p : products) 
             if (p.getCategory() == category)
@@ -40,7 +41,7 @@ public class ProductsCollection {
     }
 
     public ProductsCollection getStorageDate(int storageDate) {
-        ArrayList<Product> res = new ArrayList<Product>();
+        List<Product> res = new ArrayList<>();
 
         for (Product p : products) 
             if (p.getStorageDate() > storageDate)
@@ -53,7 +54,7 @@ public class ProductsCollection {
         return print(this.products);
     }
 
-    public ProductsCollection print(ArrayList<Product> products) {
+    public ProductsCollection print(List<Product> products) {
         int idx = 0;
 
         System.out.println(String.format("%-5s %-10s %-15s %-10s %-20s %-8s %-5s %-5s", 
