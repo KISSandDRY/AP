@@ -3,7 +3,7 @@ package main;
 import product.*;
 
 public class Main {
-    public static void initProducts(ProductsCollection pm) {
+    static void initProducts(ProductsCollection pm) {
         pm.addProduct("Laptop", "HP", "Elitebook", 199.99, 20, 12);
         pm.addProduct("Laptop", "DELL", "XPS", 400, 14, 24);
 
@@ -13,7 +13,7 @@ public class Main {
         pm.addProduct("Computer Parts", "Nvidia", "GTX1650", 200, 40, 18);
     }
 
-    public static void runTaskA(ProductsCollection pm, String category) {
+    static void runTaskA(ProductsCollection pm, String category) {
         System.out.println("Products with category \"" + category + "\":");
 
         pm.getCategory(category).print();
@@ -21,7 +21,7 @@ public class Main {
         System.out.println("");
     }
 
-    public static void runTaskB(ProductsCollection pm, String category, double price) {
+    static void runTaskB(ProductsCollection pm, String category, double price) {
         System.out.println("Products with category \"" + category + "\" and price <=" + price + ":");
         
         pm.getCategory(category).getPriceLE(price).print();
@@ -29,7 +29,7 @@ public class Main {
         System.out.println("");
     }
 
-    public static void runTaskC(ProductsCollection pm, int storageDate) {
+    static void runTaskC(ProductsCollection pm, int storageDate) {
         System.out.println("Products with storage date higher than " + storageDate + ":");
 
         pm.getStorageDate(storageDate).print();
