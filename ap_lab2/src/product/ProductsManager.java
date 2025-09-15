@@ -1,8 +1,6 @@
-package main;
+package product;
 
 import java.util.ArrayList;
-
-import product.Product;
 
 public class ProductsManager {
     private ArrayList<Product> products;

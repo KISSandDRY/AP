@@ -1,5 +1,7 @@
 package main;
 
+import product.*;
+
 public class Main {
     public static void init_products(ProductsManager pm) {
         pm.add_product("Laptop", "HP", "Elitebook", 199.99, 20, 12);
