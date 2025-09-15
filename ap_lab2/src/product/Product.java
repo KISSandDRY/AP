@@ -9,6 +9,19 @@ public class Product {
     private int storageDate; // it is in months
     private int quantity = 0;
 
+    public Product(String category, String manufacturer, String name, double price, int quantity, int storageDate) {
+        setName(name);
+        setCategory(category);
+        setManufacturer(manufacturer);
+
+        setPrice(price);
+        setQuantity(quantity);
+
+        setStorageDate(storageDate);
+
+        this.id = calcProductHash(name + manufacturer);
+    }
+
     public String toString() {
         return String.format("%+9d %-15s %-12s %-20s %8.3f %-8d %-3d",
                             id, category, manufacturer, name, price, quantity, storageDate);
@@ -24,19 +37,6 @@ public class Product {
         }
 
         return (int) hash;
-    }
-
-    public Product(String category, String manufacturer, String name, double price, int quantity, int storageDate) {
-        setName(name);
-        setCategory(category);
-        setManufacturer(manufacturer);
-
-        setPrice(price);
-        setQuantity(quantity);
-
-        setStorageDate(storageDate);
-
-        this.id = calcProductHash(name + manufacturer);
     }
 
     // Get values

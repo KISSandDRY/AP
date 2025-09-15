@@ -15,6 +15,7 @@ public class ProductsCollection {
 
     public void addProduct(String category, String manufacturer, String name, double price, int quantity, int storageDate) {
         Product p = new Product(category, manufacturer, name, price, quantity, storageDate);
+
         products.add(p);
     }
 
@@ -53,13 +54,13 @@ public class ProductsCollection {
     }
 
     public ProductsCollection print(ArrayList<Product> products) {
-        int index = 0;
+        int idx = 0;
 
         System.out.println(String.format("%-5s %-10s %-15s %-10s %-20s %-8s %-5s %-5s", 
                 "#", "ID", "Category", "Manufacturer", "Name", "Price($)", "Quantity", "Storage date(months)"));
 
         for (Product p : products) 
-            System.out.println(String.format("(%3d) %s", ++index, p));
+            System.out.println(String.format("(%3d) %s", ++idx, p));
         
         return this;
     }

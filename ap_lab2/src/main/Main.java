@@ -3,6 +3,16 @@ package main;
 import product.*;
 
 public class Main {
+    public static void main(String[] args) {
+        ProductsCollection pm = new ProductsCollection();
+
+        initProducts(pm);
+        
+        runTaskA(pm, "Laptop");
+        runTaskB(pm, "Laptop", 200);
+        runTaskC(pm, 18);
+    }
+
     static void initProducts(ProductsCollection pm) {
         pm.addProduct("Laptop", "HP", "Elitebook", 199.99, 20, 12);
         pm.addProduct("Laptop", "DELL", "XPS", 400, 14, 24);
@@ -35,15 +45,5 @@ public class Main {
         pm.getStorageDate(storageDate).print();
 
         System.out.println("");
-    }
-
-    public static void main(String[] args) {
-        ProductsCollection pm = new ProductsCollection();
-
-        initProducts(pm);
-        
-        runTaskA(pm, "Laptop");
-        runTaskB(pm, "Laptop", 200);
-        runTaskC(pm, 18);
     }
 }
