@@ -68,14 +68,23 @@ public class Product {
     // Set values
 
     public void setName(String name) {
+        if (name == null)
+            throw new IllegalArgumentException("Error: name can not be null");
+
         this.name = name;
     }
 
     public void setCategory(String category) {
+        if (category == null)
+            throw new IllegalArgumentException("Error: category can not be null");
+
         this.category = category;
     }
 
     public void setManufacturer(String manufacturer) {
+        if (manufacturer == null)
+            throw new IllegalArgumentException("Error: manufacturer can not be null");
+
         this.manufacturer = manufacturer;
     }
 
