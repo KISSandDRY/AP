@@ -24,13 +24,6 @@ package negfib;
  */
 public class Main {
     /**
-     * Default constructor for Main class.
-     */
-    // public Main() {
-    //     // Constructor body can be empty or include initialization code
-    // }
-    
-    /**
      * Prints help info if no arguments were passed.
      */
     static void printHelp() {
