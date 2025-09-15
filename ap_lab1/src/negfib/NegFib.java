@@ -8,8 +8,8 @@ package negfib;
  * </p>
  */
 public class NegFib {
-    final int number;
-    long value = 0;
+    private final int number;
+    private long value = 0;
 
     /**
      * Constructs a NegFib object with the given index number.
@@ -23,7 +23,7 @@ public class NegFib {
 
         this.number = -number;
 
-        calculate_value();
+        calculateValue();
     }
 
     /**
@@ -31,7 +31,7 @@ public class NegFib {
      *
      * @return the value number
      */
-    public long get_value() {
+    public long getValue() {
         return value;
     }
 
@@ -40,11 +40,11 @@ public class NegFib {
      *
      * @return the index number
      */
-    public int get_number() {
+    public int getNumber() {
         return number;
     }
 
-    private void calculate_value() {
+    private void calculateValue() {
         long a = 0, b = 1;
 
         if (number >= 1)

@@ -24,16 +24,9 @@ package negfib;
  */
 public class Main {
     /**
-     * Default constructor for Main class.
-     */
-    // public Main() {
-    //     // Constructor body can be empty or include initialization code
-    // }
-    
-    /**
      * Prints help info if no arguments were passed.
      */
-    static void print_help() {
+    static void printHelp() {
         System.out.print("Usage:\n\t$ java src.negfib.Main {number}\nExample: $ java src.negfib.Main -10");
     }
 
@@ -47,7 +40,7 @@ public class Main {
      */
     public static void main(String[] args) {
         if (args.length < 1) {
-            print_help();
+            printHelp();
             return;
         }
 
@@ -55,6 +48,6 @@ public class Main {
 
         NegFib res = new NegFib(number);
 
-        System.out.println("NegFib number: " + number + "\n\tValue: " + res.get_value());
+        System.out.println("NegFib number: " + number + "\n\tValue: " + res.getValue());
     }
 }
