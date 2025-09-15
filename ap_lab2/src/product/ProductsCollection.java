@@ -2,14 +2,14 @@ package product;
 
 import java.util.ArrayList;
 
-public class ProductsManager {
+public class ProductsCollection {
     private ArrayList<Product> products;
 
-    public ProductsManager() {
+    public ProductsCollection() {
         products = new ArrayList<Product>();
     }
 
-    public ProductsManager(ArrayList<Product> products) {
+    public ProductsCollection(ArrayList<Product> products) {
         this.products = products;
     }
 
@@ -18,41 +18,41 @@ public class ProductsManager {
         products.add(p);
     }
 
-    public ProductsManager getPriceLE(double price) {
+    public ProductsCollection getPriceLE(double price) {
         ArrayList<Product> res = new ArrayList<Product>();
 
         for (Product p : products) 
             if (p.getPrice() <= price)
                 res.add(p);
 
-        return new ProductsManager(res);
+        return new ProductsCollection(res);
     }
 
-    public ProductsManager getCategory(String category) {
+    public ProductsCollection getCategory(String category) {
         ArrayList<Product> res = new ArrayList<Product>();
 
         for (Product p : products) 
             if (p.getCategory() == category)
                 res.add(p);
 
-        return new ProductsManager(res);
+        return new ProductsCollection(res);
     }
 
-    public ProductsManager getStorageDate(int storageDate) {
+    public ProductsCollection getStorageDate(int storageDate) {
         ArrayList<Product> res = new ArrayList<Product>();
 
         for (Product p : products) 
             if (p.getStorageDate() > storageDate)
                 res.add(p);
 
-        return new ProductsManager(res);
+        return new ProductsCollection(res);
     }
 
-    public ProductsManager print() {
+    public ProductsCollection print() {
         return print(this.products);
     }
 
-    public ProductsManager print(ArrayList<Product> products) {
+    public ProductsCollection print(ArrayList<Product> products) {
         int index = 0;
 
         System.out.println(String.format("%-5s %-10s %-15s %-10s %-20s %-8s %-5s %-5s", 
