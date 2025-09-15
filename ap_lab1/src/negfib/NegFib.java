@@ -8,8 +8,8 @@ package negfib;
  * </p>
  */
 public class NegFib {
-    final int number;
-    long value = 0;
+    private final int number;
+    private long value = 0;
 
     /**
      * Constructs a NegFib object with the given index number.
