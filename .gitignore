@@ -6,3 +6,7 @@ out/
 docs/
 other/
 target/
+.classpath
+.project
+.settings/
+.rpl
