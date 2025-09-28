@@ -2,6 +2,7 @@
 *.docx
 *.jar
 *.class
+*.rpl
 out/
 docs/
 other/
@@ -9,4 +10,3 @@ target/
 .classpath
 .project
 .settings/
-.rpl
