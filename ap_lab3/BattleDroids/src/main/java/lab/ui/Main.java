@@ -45,7 +45,7 @@ public class Main {
     }
 
     private static void createDroid() {
-        System.out.println("Choose type: 1) Assault 2) Sniper 3) Medic");
+        System.out.println("Choose type: 1) Soldier 2) Hitman 3) Medic");
         String t = sc.nextLine().trim();
 
         System.out.print("Enter name: ");
@@ -54,8 +54,8 @@ public class Main {
         Droid d = null;
 
         switch (t) {
-            case "1": d = new AssaultDroid(name); break;
-            case "2": d = new SniperDroid(name); break;
+            case "1": d = new SoldierDroid(name); break;
+            case "2": d = new HitmanDroid(name); break;
             case "3": d = new MedicDroid(name); break;
             default: System.out.println("Unknown type"); return;
         }
@@ -104,11 +104,11 @@ public class Main {
 
     private static Droid cloneDroid(Droid src) {
         // shallow cloning by type
-        if (src instanceof AssaultDroid) return new AssaultDroid(src.getName());
-        if (src instanceof SniperDroid) return new SniperDroid(src.getName());
+        if (src instanceof SoldierDroid) return new SoldierDroid(src.getName());
+        if (src instanceof HitmanDroid) return new HitmanDroid(src.getName());
         if (src instanceof MedicDroid) return new MedicDroid(src.getName());
         // by default
-        return new AssaultDroid(src.getName());
+        return new SoldierDroid(src.getName());
     }
 
     private static void runTeamBattle() {

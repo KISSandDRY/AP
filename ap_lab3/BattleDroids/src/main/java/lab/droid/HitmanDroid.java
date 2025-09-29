@@ -1,7 +1,7 @@
 package lab.droid;
 
-public class SniperDroid extends Droid {
-    public SniperDroid(String name) {
+public class HitmanDroid extends Droid {
+    public HitmanDroid(String name) {
         // low health, high damage, high accuracy but slow energy regen
         super(name, 70, 34, 0.85, 8);
     }

@@ -1,7 +1,7 @@
 package lab.droid;
 
-public class AssaultDroid extends Droid {
-    public AssaultDroid(String name) {
+public class SoldierDroid extends Droid {
+    public SoldierDroid(String name) {
         // high health, moderate damage, good accuracy
         super(name, 120, 18, 0.75, 10);
     }
