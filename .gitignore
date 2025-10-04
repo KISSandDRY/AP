@@ -10,3 +10,8 @@ target/
 .classpath
 .project
 .settings/
+.env
+*.ps1
+*.bat
+*.cmd
+*.sh
