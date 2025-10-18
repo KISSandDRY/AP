@@ -1,10 +1,10 @@
 package console.commands.system;
 
-import deposit.integration.nbu.NBU;
 import console.CommandResult;
 import console.CommandContext;
 import console.commands.api.AbstractCommand;
 import console.util.ParsedArgs;
+import deposit.integration.nbu.NBU;
 
 /**
  * A command that displays the current key statistics from the National Bank of Ukraine (NBU).

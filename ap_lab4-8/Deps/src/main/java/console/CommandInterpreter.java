@@ -14,8 +14,6 @@ import java.util.Arrays;
 import java.util.Scanner;
 import java.util.LinkedHashMap;
 
-
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -46,10 +44,8 @@ public class CommandInterpreter {
      */
     public CommandInterpreter(final DepositService service) {
         this.context = new CommandContext(service, new Scanner(System.in), this);
-
         initializeCommands();
-
-        logger.log(Level.INFO, "Commands initialized.");
+        logger.info("CommandInterpreter initialized with {} commands.", commands.size());
     }
 
     /**
@@ -78,12 +74,12 @@ public class CommandInterpreter {
      */
     public void start() {
         clearScreen();
-
         System.out.printf("%s (type 'help' for commands)\n", AppInfo.getFullAppName());
 
         while (true) {
             System.out.print(PROMPT);
             String inputLine = context.getScanner().nextLine().trim();
+            logger.debug("User input received: '{}'", inputLine);
 
             if (inputLine.isEmpty()) 
                 continue;
@@ -103,10 +99,11 @@ public class CommandInterpreter {
                     String commandName = parts[0].toLowerCase();
                     String[] args = Arrays.copyOfRange(parts, 1, parts.length);
 
+                    logger.debug("Executing command: '{}' with args: {}", commandName, Arrays.toString(args));
+
                     AbstractCommand cmd = commands.get(commandName);
                     if (cmd == null) {
                         suggestClosestCommand(commandName);
-
                         throw new Exception("Command not found: " + commandName);
                     }
 
@@ -115,22 +112,26 @@ public class CommandInterpreter {
                     finalResult = cmd.execute(context, args);
 
                     // Stop the pipeline on failure
-                    if (!finalResult.isSuccess()) 
+                    if (!finalResult.isSuccess()) {
+                        logger.warn("Command '{}' failed, stopping pipeline. Reason: {}", 
+                            commandName, finalResult.getMessage().orElse("No reason given."));
                         break; 
+                    }
                 }
 
                 if (finalResult != null && !finalResult.isSuccess()) {
                     System.out.println(finalResult.getMessage().orElse("An unknown error occurred."));
-                    logger.log(Level.ERROR, finalResult.getMessage().orElse("An unknown error occurred."));
+                    logger.error(finalResult.getMessage().orElse("An unknown error occurred."));
                 }
 
             } catch (Exception e) {
                 System.out.println("An error occurred: " + e.getMessage());
-                logger.log(Level.ERROR, "An error occurred: " + e.getMessage());
+                logger.error("An error occurred: " + e.getMessage());
             }
         }
 
         System.out.println("Exiting application.");
+        logger.info("Command interpreter loop terminated. Exiting application.");
     }
 
     /**
@@ -161,20 +162,25 @@ public class CommandInterpreter {
             }
         }
 
-        if (minDist <= 3)
+        if (minDist <= 3) {
             System.out.printf("Unknown command '%s'. Did you mean '%s'?%n", input, bestMatch);
-        else 
+            logger.warn("Unknown command '{}' entered. Suggested '{}'.", input, bestMatch);
+        } else {
             System.out.printf("Unknown command '%s'. Type 'help' for a list of commands.%n", input);
-        
+            logger.warn("Unknown command '{}' entered. No suggestion found.", input);
+        }
     }
 
     /**
      * Registers and initializes all available console commands.
      */
     private void initializeCommands() {
+
+        // HelpCommand needs a reference to the commands map to function.
         HelpCommand helpCommand = new HelpCommand(this.commands);
 
         registerCommand(
+            // Deposit Commands
             new AddDepositCommand(),
             new RemoveDepositCommand(),
             new ListCommand(),
@@ -182,11 +188,13 @@ public class CommandInterpreter {
             new SortCommand(),
             new SuggestDepositsCommand(),
 
+            // Account Commands
             new OpenAccountCommand(),
             new CloseAccountCommand(),
             new ReplenishAccountCommand(),
             new CalcAccountProfitCommand(),
 
+            // System & Pipeline Commands
             new PrintCommand(),
             new NBUStatsCommand(),
             new SaveCommand(),

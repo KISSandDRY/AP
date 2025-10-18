@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import java.util.function.Predicate;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -137,12 +136,11 @@ public final class FileDepositRepository<T extends IStorable> implements IDeposi
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
             oos.writeObject(entities);
 
-            logger.log(Level.INFO, "Successfully saved " + entities.size() + " entities to " + filename);
-
+            logger.info("Successfully saved " + entities.size() + " entities to " + filename);
             return true;
 
         } catch (IOException e) {
-            logger.log(Level.ERROR, "Failed to save data to file " + filename + ": " + e.getMessage());
+            logger.error("Failed to save data to file " + filename + ": " + e.getMessage());
             throw new DataAccessException("Failed to save data to file: " + filename, e);
         }
     }
@@ -160,12 +158,11 @@ public final class FileDepositRepository<T extends IStorable> implements IDeposi
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
             entities = (Map<UUID, T>) ois.readObject();
 
-            logger.log(Level.INFO, "Successfully loaded " + entities.size() + " entities from " + filename);
-
+            logger.info("Successfully loaded " + entities.size() + " entities from " + filename);
             return true;
 
         } catch (IOException | ClassNotFoundException e) {
-            logger.log(Level.ERROR, "Failed to load data from file " + filename + ": " + e.getMessage());
+            logger.error("Failed to load data from file " + filename + ": " + e.getMessage());
             throw new DataAccessException("Failed to load data from file: " + filename, e);
         }
     }

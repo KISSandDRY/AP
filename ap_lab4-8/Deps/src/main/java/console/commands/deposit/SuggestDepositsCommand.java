@@ -13,11 +13,16 @@ import deposit.domain.value.TermPeriod;
 
 import java.math.BigDecimal;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 /**
  * A command that suggests suitable deposit products based on user-provided criteria,
  * such as investment amount and term.
  */
 public class SuggestDepositsCommand extends AbstractCommand {
+
+    private static final Logger logger = LogManager.getLogger(SuggestDepositsCommand.class);
 
     /**
      * Default constructor.
@@ -44,11 +49,15 @@ public class SuggestDepositsCommand extends AbstractCommand {
         final CommandContext context, 
         final ParsedArgs args
     ) {
+        logger.debug("Executing SuggestDepositsCommand.");
+
         try {
             // Step 1. Get user input
             Currency selectedCurrency = Utils.readCurrency(context.getScanner());
             String amountStr = Utils.readNonEmptyString(context.getScanner(), "Enter your desired investment amount (e.g., 50000): ");
             int termMonths = Utils.readInt(context.getScanner(), "Enter your desired term in months (e.g., 12): ");
+            logger.info("User criteria for suggestion: currency={}, amount={}, term={} months.", 
+                        selectedCurrency, amountStr, termMonths);
 
             // Step 2. Make objects
             Money amount = new Money(new BigDecimal(amountStr), selectedCurrency);
@@ -56,6 +65,7 @@ public class SuggestDepositsCommand extends AbstractCommand {
 
             // Step 3. Get suggestions
             var suggested = context.getService().getSuggestions(amount, term);
+            logger.info("Received {} suggestions from the service.", suggested.size());
 
             // Step 4. Print suggestions
             System.out.println("\nSuggested deposits based on your criteria (best match first):");
@@ -68,9 +78,11 @@ public class SuggestDepositsCommand extends AbstractCommand {
             return CommandResult.success();
 
         } catch (CommandCancelledException e) {
+            logger.info("User cancelled the suggestion process.");
             return CommandResult.failure("Suggestion cancelled.");
 
         } catch (Exception e) {
+            logger.error("An unexpected error occurred while getting suggestions.", e);
             return CommandResult.failure("Could not get suggestions: " + e.getMessage());
         }
     }

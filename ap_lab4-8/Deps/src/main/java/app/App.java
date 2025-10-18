@@ -11,8 +11,8 @@ import console.util.ArgParser;
 import console.util.ParsedArgs;
 
 import java.util.List;
+import java.util.Arrays;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -33,7 +33,12 @@ public final class App {
      * List of flags available during application startup.
      */
     private final List<Flag> startupFlags;
-    
+
+    // These fields are nullable because initialization can be stopped by a startup flag.
+    private CommandInterpreter interpreter;
+    private NBUUpdater nbuUpdater;
+    private boolean shouldStart = true;
+
     /**
      * Main app class. Resposible for configuring and starting app.
      *
@@ -43,7 +48,7 @@ public final class App {
         this.startupFlags = defineStartupFlags();
         ParsedArgs parsedArgs = ArgParser.parse(args);
 
-        logger.log(Level.INFO, "CLI arguments parsed.");
+        logger.info("Application starting up with arguments(CLI arguments parsed): {}", Arrays.toString(args));
     
         // Initialize Configuration with Correct Priority 
         // 1. Base defaults from a properties file.
@@ -56,27 +61,29 @@ public final class App {
             new AppConfig.CLIConfigSource(args)
         );
         AppConfig config = AppConfig.getInstance();
+        logger.debug("Configuration loaded successfully: {}", config);
 
-        logger.log(Level.INFO, "Configuration sources loaded.");
-
-        // Handle immediate-exit flags BEFORE initializing the full application
         if (parsedArgs.hasFlag("version") || parsedArgs.hasFlag("v")) {
             printVersion(); 
+            this.shouldStart = false;
             return;
         }
     
         if (parsedArgs.hasFlag("help") || parsedArgs.hasFlag("h")) {
             printHelp(); 
+            this.shouldStart = false;
             return;
         }
 
         if (parsedArgs.hasFlag("config") || parsedArgs.hasFlag("c")) {
             System.out.println(config);
+            this.shouldStart = false;
             return;
         }
 
-        // Setting up services and resources
-        NBUUpdater nbuUpdater = new NBUUpdater(config.getInt(AppConfigKeys.NBU_UPDATE_INTERVAL));
+        // Initialize Services and Repositories 
+        logger.info("Initializing application services...");
+        this.nbuUpdater = new NBUUpdater(config.getInt(AppConfigKeys.NBU_UPDATE_INTERVAL));
 
         String depositsFile = config.getString(AppConfigKeys.DEPOSITS_FILE);
         String accountsFile = config.getString(AppConfigKeys.ACCOUNTS_FILE);
@@ -85,18 +92,38 @@ public final class App {
         IDepositRepository<DepositAccount> accountRepo = new FileDepositRepository<>(accountsFile);
         DepositService service = new DepositService(depositRepo, accountRepo);
 
-        logger.log(Level.INFO, "App is setted up.");
-
         // Handle runtime flags
-        if (parsedArgs.hasFlag("autoload") || parsedArgs.hasFlag("a")) 
+        if (parsedArgs.hasFlag("autoload") || parsedArgs.hasFlag("a")) {
+            logger.info("Autoload flag detected. Loading all data from files...");
             service.loadAllData();
+        } 
 
         //TODO: add autosave flag
 
-        // Start the Application
+        this.interpreter = new CommandInterpreter(service);
+        logger.info("Application setup complete. Ready to start.");
+    }
+
+    /**
+     * Starts the application's main processes (NBU updater and command loop).
+     * This method will not run if a startup flag like --help was used.
+     */
+    public void start() {
+        if (!shouldStart) {
+            logger.debug("Application start aborted due to startup flag.");
+            return;
+        }
+        
+        logger.info("Starting NBU updater thread...");
         nbuUpdater.start();
-        Runtime.getRuntime().addShutdownHook(new Thread(nbuUpdater::terminate));
-        new CommandInterpreter(service).start();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.info("Shutdown hook activated. Terminating NBU updater.");
+            nbuUpdater.terminate();
+        }));
+
+        logger.info("Starting command interpreter loop.");
+        interpreter.start();
+        logger.info("Application shutting down.");
     }
 
     /**
@@ -105,7 +132,8 @@ public final class App {
      * @param args CLI arguments passed to application.
      */
     public static void main(final String[] args) {
-        new App(args);
+        App app = new App(args);
+        app.start();
     }
 
     /**

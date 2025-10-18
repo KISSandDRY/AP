@@ -7,6 +7,9 @@ import console.util.ParsedArgs;
 
 import java.util.Optional;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 /**
  * A command to save application data to files.
  * <p>
@@ -17,6 +20,8 @@ import java.util.Optional;
  * @see LoadCommand
  */
 public class SaveCommand extends AbstractCommand {
+
+    private static final Logger logger = LogManager.getLogger(SaveCommand.class);
 
     /**
      * Default constructor.
@@ -40,18 +45,28 @@ public class SaveCommand extends AbstractCommand {
 
     @Override
     public CommandResult executeLogic(final CommandContext context, final ParsedArgs args) {
+        logger.debug("Executing SaveCommand with args: {}", args.getOptions());
         Optional<String> depositsFile = args.getOption("deposits");
         Optional<String> accountsFile = args.getOption("accounts");
 
         // If no flags are provided, save everything to default locations.
         if (depositsFile.isEmpty() && accountsFile.isEmpty() && args.getPositionalArgs().isEmpty()) {
             System.out.println("Saving all data to default files...");
+            logger.info("Attempting to save all data from default repository files.");
 
             try {
                 boolean success = context.getService().saveAllData();
-                return success ? CommandResult.success("Default save complete.") : CommandResult.failure("Default save failed.");
+
+                if (success) {
+                    logger.info("Default save operation completed successfully.");
+                    return CommandResult.success("Default save complete.");
+                } else {
+                    logger.warn("Default save operation failed as reported by the service.");
+                    return CommandResult.failure("Default save failed.");
+                }
 
             } catch (Exception e) {
+                logger.error("An exception occurred during default data save.", e);
                 return CommandResult.failure("Error during default save: " + e.getMessage());
             }
         }
@@ -60,13 +75,18 @@ public class SaveCommand extends AbstractCommand {
             if (depositsFile.isPresent()) {
                 String file = depositsFile.get();
                 System.out.println("Saving deposits to " + file + "...");
+
+                logger.info("Attempting to save deposits from specified file: {}", file);
                 context.getService().saveDeposits(file);
+                logger.info("Successfully saved deposits from {}.", file);
             }
 
             if (accountsFile.isPresent()) {
                 String file = accountsFile.get();
                 System.out.println("Saving accounts to " + file + "...");
+                logger.info("Attempting to save accounts from specified file: {}", file);
                 context.getService().saveAccounts(file);
+                logger.info("Successfully saved accounts from {}.", file);
             }
             
             System.out.println("Save operation successful.");
@@ -74,6 +94,7 @@ public class SaveCommand extends AbstractCommand {
             return CommandResult.success();
 
         } catch (Exception e) {
+            logger.error("An exception occurred during specific file save operation.", e);
             return CommandResult.failure("Save operation failed: " + e.getMessage());
         }
     }

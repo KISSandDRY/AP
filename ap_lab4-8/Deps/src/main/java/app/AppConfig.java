@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.lang.reflect.Modifier;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -63,9 +62,12 @@ public final class AppConfig {
         final Class<?> keysInterface, 
         final IConfigSource... sources
     ) {
-        if (instance != null) 
-            throw new IllegalStateException("AppConfig already initialized");
+        if (instance != null) {
+            logger.warn("AppConfig already initialized. Ignoring subsequent init call.");
+            return;
+        }
 
+        logger.debug("Initializing AppConfig...");
         // Use reflection to dynamically discover all defined keys from the interface.
         Set<String> discoveredKeys = new HashSet<>();
         for (var field : keysInterface.getFields()) 
@@ -77,15 +79,20 @@ public final class AppConfig {
                     discoveredKeys.add((String) field.get(null));
                 } catch (IllegalAccessException e) {
                     // This should not happen for public static fields.
-                    logger.log(Level.WARN, "Could not access key from ConfigKeys: " + field.getName());
+                    logger.warn("Could not access key from ConfigKeys: " + field.getName());
                 }
             }
+        
+        logger.debug("Discovered {} known configuration keys.", discoveredKeys.size());
 
         Map<String, String> merged = new LinkedHashMap<>();
-        for (var source : sources) 
+        for (var source : sources) {
+            logger.debug("Loading configuration from source: {}", source.getClass().getSimpleName());
             merged.putAll(source.load());
+        }
 
         instance = new AppConfig(merged, discoveredKeys);
+        logger.info("AppConfig initialized successfully with {} sources.", sources.length);
     }
 
     /**
@@ -161,7 +168,7 @@ public final class AppConfig {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
-            logger.log(Level.WARN, "Invalid integer format for key '" + key + "'. Value was '" + value + "'. Using default value " + def + ".");
+            logger.warn("Invalid integer format for key '" + key + "'. Value was '" + value + "'. Using default value " + def + ".");
             return def; // Return default if parsing fails
         }
     }
@@ -196,7 +203,7 @@ public final class AppConfig {
         try {
             return Double.parseDouble(value);
         } catch (NumberFormatException e) {
-            logger.log(Level.WARN, "Invalid double format for key '" + key + "'. Value was '" + value + "'. Using default value " + def + ".");
+            logger.warn("Invalid double format for key '" + key + "'. Value was '" + value + "'. Using default value " + def + ".");
             return def;
         }
     }
@@ -340,13 +347,15 @@ public final class AppConfig {
 
             try (InputStream is = AppConfig.class.getClassLoader().getResourceAsStream(resourceName)) {
                 if (is == null) {
-                    logger.log(Level.WARN, "Could not find resource file '" + resourceName + "' on the classpath.");
+                    logger.warn("Could not find resource file '" + resourceName + "' on the classpath.");
                     return Collections.emptyMap();
                 }
 
                 props.load(is);
+                logger.debug("Successfully loaded {} properties from classpath resource '{}'.", props.size(), resourceName);
+                
             } catch (IOException e) {
-                logger.log(Level.WARN, "Error reading resource file '" + resourceName + "': " + e.getMessage());
+                logger.error("Error reading resource file '{}': {}", resourceName, e.getMessage(), e);
             }
 
             Map<String, String> map = new HashMap<>();
@@ -381,7 +390,7 @@ public final class AppConfig {
             try (FileInputStream fis = new FileInputStream(path)) {
                 props.load(fis);
             } catch (IOException e) {
-                logger.log(Level.WARN, "Could not find config file.");
+                logger.warn("Could not find config file.");
             }
 
             Map<String, String> map = new HashMap<>();

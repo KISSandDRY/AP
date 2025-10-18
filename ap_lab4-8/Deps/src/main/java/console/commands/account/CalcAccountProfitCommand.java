@@ -16,12 +16,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Collections;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 /**
  * Calculates profit for one or more deposit accounts.
  * It can process a list of accounts passed from a previous command in a pipeline
  * or interactively prompt the user to select accounts if no pipeline data is present.
  */
 public class CalcAccountProfitCommand extends AbstractCommand {
+
+    private static final Logger logger = LogManager.getLogger(CalcAccountProfitCommand.class);
 
     /**
      * Default constructor.
@@ -49,29 +54,34 @@ public class CalcAccountProfitCommand extends AbstractCommand {
         final CommandContext context, 
         final ParsedArgs args
     ) {
+        logger.debug("Executing CalcAccountProfitCommand with args: {}", args.getPositionalArgs());
+
         try {
             // Determine which accounts to process (from pipeline or user selection).
             List<DepositAccount> accountsToProcess = getAccountsToProcess(context);
 
             if (accountsToProcess.isEmpty()) {
                 System.out.println("No accounts were selected for profit calculation.");
-
+                logger.info("No accounts were selected or found to process.");
                 return CommandResult.success();
             }
 
+            logger.info("Generating profit report for {} account(s).", accountsToProcess.size());
             // Generate and print the profit report.
             new ProfitReportPrinter(context.getService()).print(accountsToProcess);
 
             return CommandResult.success();
 
         } catch (EmptyListException e) {
+            logger.warn("Operation failed because no accounts are available in the system.");
             return CommandResult.failure("No accounts are available to calculate profit.");
 
         } catch (CommandCancelledException e) {
+            logger.info("User cancelled the profit calculation command.");
             return CommandResult.failure("Profit calculation was cancelled.");
 
         } catch (Exception e) {
-            // Catch any other unexpected errors during execution.
+            logger.error("An unexpected error occurred during profit calculation.", e);
             return CommandResult.failure("An unexpected error occurred: " + e.getMessage());
         }
     }
@@ -95,11 +105,12 @@ public class CalcAccountProfitCommand extends AbstractCommand {
 
         if (pipelineAccounts.isPresent()) {
             List<DepositAccount> accounts = pipelineAccounts.get();
-
+            logger.info("Processing {} accounts found in the command pipeline.", accounts.size());
             return accounts;
         }
 
         // If no pipeline data, fall back to interactive selection.
+        logger.info("No pipeline data found. Switching to interactive account selection.");
         return selectAccountsInteractively(context);
     }
 
@@ -122,8 +133,10 @@ public class CalcAccountProfitCommand extends AbstractCommand {
             true // Allow the user to select "All"
         );
 
-        if (selection.isAll()) 
+        if (selection.isAll()) {
+            logger.debug("User selected 'All' accounts for calculation.");
             return allAccounts;
+        }
 
         return selection.selectedItem()
             .map(List::of) // If an item is present, wrap it in a List

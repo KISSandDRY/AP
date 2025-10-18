@@ -16,7 +16,6 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 import java.util.function.Predicate;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -45,7 +44,10 @@ public final class DepositService {
     ) {
         this.depositRepository = depositRepository;
         this.accountRepository = accountRepository;
+        logger.info("DepositService initialized.");
     }
+
+    // Deposit Methods
 
     /**
      * Adds a new deposit to the repository.
@@ -54,8 +56,8 @@ public final class DepositService {
      */
     public void addDeposit(final Deposit deposit) {
         depositRepository.add(deposit);
-
-        logger.log(Level.INFO, "Deposit added.");
+        logger.info("Added new deposit '{}' with ID {}.", 
+            deposit.getInfo().depositName(), deposit.getId());
     }
 
     /**
@@ -65,9 +67,16 @@ public final class DepositService {
      * @return {@code true} if removed successfully, otherwise {@code false}.
      */
     public boolean removeDeposit(final UUID depositId) {
-        logger.log(Level.INFO, "Deposit removal started.");
+        logger.debug("Attempting to remove deposit with ID: {}", depositId);
+        
+        boolean result = depositRepository.remove(depositId);
 
-        return depositRepository.remove(depositId);
+        if (result)
+            logger.info("Successfully removed deposit with ID: {}", depositId);
+        else
+            logger.warn("Failed to remove deposit. No deposit found with ID: {}", depositId);
+
+        return result;
     }
 
     /**
@@ -77,21 +86,8 @@ public final class DepositService {
      * @return List of matching deposits.
      */
     public List<Deposit> searchDeposit(final Predicate<Deposit> filter) {
-        logger.log(Level.INFO, "Deposit search started.");
-
+        logger.debug("Searching for deposits.");
         return depositRepository.findAll(filter, null);
-    }
-
-    /**
-     * Searches for deposit accounts that match the given filter.
-     *
-     * @param filter The search predicate.
-     * @return List of matching accounts.
-     */
-    public List<DepositAccount> searchAccount(final Predicate<DepositAccount> filter) {
-        logger.log(Level.INFO, "Account search started.");
-
-        return accountRepository.findAll(filter, null);
     }
 
     /**
@@ -100,11 +96,11 @@ public final class DepositService {
      * @return List of all deposits.
      */
     public List<Deposit> getAllDeposits() {
-        logger.log(Level.INFO, "All Deposits returned.");
+        logger.info("Fetching all deposits.");
 
         return depositRepository.findAll(null, null);
     }
-    
+
     /**
      * Returns a list of deposit suggestions suitable for the user's amount and term.
      *
@@ -113,7 +109,7 @@ public final class DepositService {
      * @return Ranked list of suggested deposits.
      */
     public List<Deposit> getSuggestions(final Money amount, final TermPeriod term) {
-        logger.log(Level.INFO, "Suggestions returned.");
+        logger.info("Generating suggestions for amount {} and term {} months.", amount, term.months());
 
         return getAllDeposits().stream()
             .filter(deposit -> deposit.getInfo().currency().equals(amount.currency()))
@@ -123,27 +119,7 @@ public final class DepositService {
             .collect(Collectors.toList());
     }
 
-    /**
-     * Calculates a relative score for a deposit to rank suggestions.
-     *
-     * @param deposit     The deposit.
-     * @param userAmount  The user's amount.
-     * @return Score value (higher is better).
-     */
-    private double calculateScore(final Deposit deposit, final Money userAmount) {
-        double score = 0;
-        score += deposit.getInterestRate().getRateValue().doubleValue() * 50;
-        score += deposit.getInfo().payoutFrequency() * 2;
-        score += Math.log(userAmount.amount().doubleValue() + 1);
-
-        if (deposit.getPolicy().canReplenish()) 
-            score += 5;
-
-        if (deposit.getPolicy().canWithdrawEarly()) 
-            score += 2;
-
-        return score;
-    }
+    // Account Methods 
 
     /**
      * Opens a new deposit account for a specific deposit.
@@ -159,13 +135,16 @@ public final class DepositService {
         final Money initialAmount, 
         final TermPeriod term
     ) throws DepositNotFoundException {
+        logger.info("Attempting to open account for deposit ID {} with amount {} for {} months.", 
+            depositId, initialAmount, term.months());
+
         Deposit deposit = depositRepository.findById(depositId)
                 .orElseThrow(() -> new DepositNotFoundException(depositId));
 
         DepositAccount newAccount = new DepositAccount(deposit, initialAmount, term);
         accountRepository.add(newAccount);
 
-        logger.log(Level.INFO, "Account opened.");
+        logger.info("Successfully opened new account with ID {}.", newAccount.getId());
 
         return newAccount;
     }
@@ -178,9 +157,37 @@ public final class DepositService {
      * @throws DepositNotFoundException if no account with the given ID exists.
      */
     public boolean closeAccount(final UUID accountId) throws DepositNotFoundException {
-        logger.log(Level.INFO, "Account removal started.");
+        logger.debug("Attempting to close account with ID: {}", accountId);
 
-        return accountRepository.remove(accountId); 
+        boolean result = accountRepository.remove(accountId);
+
+         if (result)
+            logger.info("Successfully closed account with ID: {}", accountId);
+        else
+            logger.warn("Failed to close account. No account found with ID: {}", accountId);
+
+        return result; 
+    }
+
+    /**
+     * Searches for deposit accounts that match the given filter.
+     *
+     * @param filter The search predicate.
+     * @return List of matching accounts.
+     */
+    public List<DepositAccount> searchAccount(final Predicate<DepositAccount> filter) {
+        logger.debug("Searching for accounts.");
+        return accountRepository.findAll(filter, null);
+    }
+
+   /**
+     * Returns all customer deposit accounts.
+     *
+     * @return List of all accounts.
+     */
+    public List<DepositAccount> getAllAccounts() {
+        logger.debug("Fetching all accounts.");
+        return accountRepository.findAll(null, null);
     }
 
     /**
@@ -194,24 +201,17 @@ public final class DepositService {
         final UUID accountId, 
         final Money amount
     ) throws DepositNotFoundException {
+        logger.debug("Attempting to replenish account {} with amount {}.", accountId, amount);
+        
         DepositAccount account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new DepositNotFoundException(accountId));
 
         account.replenish(amount);
 
-        logger.log(Level.INFO, "Account replenished.");
+        logger.info("Successfully replenished account {}.", accountId);
     }
 
-   /**
-     * Returns all customer deposit accounts.
-     *
-     * @return List of all accounts.
-     */
-    public List<DepositAccount> getAllAccounts() {
-        logger.log(Level.INFO, "Accounts returned.");
-
-        return accountRepository.findAll(null, null);
-    }
+    // Calculation Methods 
 
     /**
      * Calculates the net profit after applying tax by decorating the account's
@@ -276,6 +276,8 @@ public final class DepositService {
     public Money calculateGross(final DepositAccount account) {
         return account.calculateProfit();
     }
+
+    // Persistence Methods 
     
     /**
      * Saves all deposit accounts using the default file name.
@@ -439,5 +441,27 @@ public final class DepositService {
      */
     public boolean loadAllData(final String depositsFile, final String accountsFile) {
         return loadDeposits(depositsFile) && loadAccounts(accountsFile);
+    }
+
+    /**
+     * Calculates a relative score for a deposit to rank suggestions.
+     *
+     * @param deposit     The deposit.
+     * @param userAmount  The user's amount.
+     * @return Score value (higher is better).
+     */
+    private double calculateScore(final Deposit deposit, final Money userAmount) {
+        double score = 0;
+        score += deposit.getInterestRate().getRateValue().doubleValue() * 50;
+        score += deposit.getInfo().payoutFrequency() * 2;
+        score += Math.log(userAmount.amount().doubleValue() + 1);
+
+        if (deposit.getPolicy().canReplenish()) 
+            score += 5;
+
+        if (deposit.getPolicy().canWithdrawEarly()) 
+            score += 2;
+
+        return score;
     }
 }

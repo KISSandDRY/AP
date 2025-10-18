@@ -6,7 +6,6 @@ import java.util.Random;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
@@ -37,6 +36,8 @@ public final class NBUUpdater extends Thread {
 
         setDaemon(true);
         setName("NBU-Updater-Thread");
+
+        logger.info("NBUUpdater thread started with interval {}ms.", updateIntervalMillis);
     }
 
     /**
@@ -65,7 +66,7 @@ public final class NBUUpdater extends Thread {
                 Thread.currentThread().interrupt();
 
             } catch (Exception e) {
-                logger.log(Level.ERROR, e.getMessage());
+                logger.error(e.getMessage());
             }
         }
     }
@@ -81,11 +82,13 @@ public final class NBUUpdater extends Thread {
         BigDecimal rateDelta = BigDecimal.valueOf(0.9 + random.nextDouble() * 0.2)
                                        .setScale(4, RoundingMode.HALF_UP);
                                        
-        BigDecimal newRateValue = oldRate.multiply(rateDelta)
+        BigDecimal newRate = oldRate.multiply(rateDelta)
                                         .max(new BigDecimal("0.01")) // don't go below 1%
                                         .min(new BigDecimal("0.30")); // or above 30%
                                         
-        nbu.setInterestRate(new PercentageRate(newRateValue));
+        nbu.setInterestRate(new PercentageRate(newRate));
+
+        logger.debug("Updating NBU rate. Old rate: {}, New rate: {}", oldRate, newRate);
     }
 
     /**
@@ -102,5 +105,7 @@ public final class NBUUpdater extends Thread {
                                          .min(new BigDecimal("0.32")); // or above 32%
 
         nbu.setTax(new PercentageRate(newTax));
+
+        logger.debug("Updating NBU tax. Old tax: {}, New tax: {}", oldTax, newTax);
     }
 }
