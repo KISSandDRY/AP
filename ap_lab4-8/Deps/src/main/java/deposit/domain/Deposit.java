@@ -7,6 +7,7 @@ import deposit.interest.api.IInterestStrategy;
 import java.util.UUID;
 import java.util.Objects;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Represents a deposit with associated information, policy, interest strategy, and interest rate.
@@ -63,11 +64,12 @@ public final class Deposit implements IStorable, Serializable {
         final IInterestStrategy interestStrategy,
         final IInterestRate interestRate
     ) {
-        this.id = UUID.randomUUID();
         this.info = Objects.requireNonNull(info, "DepositInfo must not be null");
         this.policy = Objects.requireNonNull(policy, "DepositPolicy must not be null");
         this.interestStrategy = Objects.requireNonNull(interestStrategy, "Interest strategy must not be null");
         this.interestRate = Objects.requireNonNull(interestRate, "Interest rate must not be null");
+
+        this.id = generateDeterministicUUID(info, policy, interestStrategy, interestRate);
     }
 
     /**
@@ -153,5 +155,25 @@ public final class Deposit implements IStorable, Serializable {
                 + ",\n  \"policy\": " + policy 
                 + ",\n  \"strategy\": " + interestStrategy 
                 + ",\n  \"rate\"=" + interestRate + "\n}";
+    }
+
+
+    /**
+     * Creates a stable, repeatable UUID based on the core business properties of the deposit.
+     * This ensures that two deposits with identical data will always have the same UUID.
+     */
+    private UUID generateDeterministicUUID(
+        DepositInfo info,
+        DepositPolicy policy,
+        IInterestStrategy strategy,
+        IInterestRate rate 
+    ) {
+        // Create a unique string signature for this specific deposit configuration.
+        String signature = info.toString() 
+                        + policy.toString() 
+                        + strategy.getName() 
+                        + rate.getName(); // Use the value object's string representation
+
+        return UUID.nameUUIDFromBytes(signature.getBytes(StandardCharsets.UTF_8));
     }
 }

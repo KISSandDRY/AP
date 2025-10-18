@@ -57,10 +57,10 @@ public final class FixedInterestRate implements IInterestRate, Serializable {
     /**
      * Returns a string representation of this fixed interest rate with name and rate percentage.
      *
-     * @return string in the format "Fixed Interest (x.xx%)"
+     * @return string in the format "Fixed Interest"
      */
     @Override
     public String toString() {
-        return String.format("%s (%.2f%%)", getName(), rate.rate().doubleValue() * 100);
+        return String.format("%s", getName());
     }
 }

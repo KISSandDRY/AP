@@ -8,6 +8,7 @@ import deposit.exceptions.ValidationException;
 import java.util.UUID;
 import java.util.Objects;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Represents an account for a specific deposit containing the invested amount and term.
@@ -21,10 +22,6 @@ public final class DepositAccount implements IStorable, Serializable {
 
     /** Unique identifier for this account. */
     private final UUID id; 
-    //TODO: make deterministic generate based on content, 
-    //fix hashCode and equals for deposit and account to address 
-    //issue where two or more objects with the same content but 
-    //different ids
 
     /** The deposit associated with this account. */
     private final Deposit deposit;
@@ -50,7 +47,6 @@ public final class DepositAccount implements IStorable, Serializable {
         final Money initialAmount, 
         final TermPeriod term
     ) throws ValidationException {
-        this.id = UUID.randomUUID();
         this.deposit = Objects.requireNonNull(deposit, "Deposit cannot be null.");
 
         if (!deposit.getPolicy().termRange().contains(term)) 
@@ -64,6 +60,7 @@ public final class DepositAccount implements IStorable, Serializable {
 
         this.term = term;
         this.amount = initialAmount;
+        this.id = generateDeterministicUUID(deposit.getId(), amount, term);
     }
 
     /**
@@ -178,5 +175,16 @@ public final class DepositAccount implements IStorable, Serializable {
                 + "  deposit\":" + deposit 
                 + ",\n  \"amount\":" + amount 
                 + ",\n  \"term\":" + term + "\n}";
+    }
+
+    /**
+     * Creates a stable, repeatable UUID based on the core properties of the account.
+     * This imposes a business rule: a user cannot open two identical accounts
+     * with the same deposit, initial amount, and term.
+     */
+    private static UUID generateDeterministicUUID(UUID depositId, Money initialAmount, TermPeriod term) {
+        String signature = depositId.toString() + initialAmount.toString() + term.toString();
+
+        return UUID.nameUUIDFromBytes(signature.getBytes(StandardCharsets.UTF_8));
     }
 }

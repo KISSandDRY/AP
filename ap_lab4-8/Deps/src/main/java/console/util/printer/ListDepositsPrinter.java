@@ -44,7 +44,7 @@ public final class ListDepositsPrinter extends AbstractPrinter<Deposit> {
                 d.getInfo().currency().name(),
                 d.getPolicy().amountRange().toString(),
                 d.getPolicy().termRange().toString(),
-                d.getInterestRate().toString(),
+                d.getInterestRate().getName() + " " + d.getInterestRate().getRate().toString(),
                 d.getInterestStrategy().toString(),
                 d.getPolicy().canReplenish() ? "Yes" : "No",
                 d.getPolicy().canWithdrawEarly() ? "Yes" : "No"

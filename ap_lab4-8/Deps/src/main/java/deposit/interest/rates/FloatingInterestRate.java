@@ -116,10 +116,10 @@ public final class FloatingInterestRate implements IInterestRate, Serializable {
     /**
      * Returns a string representation with the name and current rate percentage.
      *
-     * @return string in the format "Floating Interest (Current: x.xx%)"
+     * @return string in the format "Floating Interest"
      */
     @Override
     public String toString() {
-        return String.format("%s (Current: %.2f%%)", getName(), currentRate.rate().doubleValue() * 100);
+        return String.format("%s", getName());
     }
 }
