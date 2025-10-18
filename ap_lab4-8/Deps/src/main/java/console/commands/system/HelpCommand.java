@@ -90,6 +90,6 @@ public class HelpCommand extends AbstractCommand {
                 .forEach(cmd -> System.out.printf(format, cmd.getName(), cmd.getDescription()));
         
         System.out.println("\nFor detailed help on a specific command, type 'help <command_name>'.");
-        System.out.println("Tip: Commands can be chained with '|', e.g., 'list --deposits | sort rate desc | print'");
+        System.out.println("Tip: Commands can be chained with '|', e.g., 'list --deposits | sort rate dsc | print'");
     }
 }

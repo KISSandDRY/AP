@@ -124,7 +124,7 @@ The application provides a rich command-line interface. Here are a few examples:
   `> search rate > 0.05 | print`
 
 - **List all accounts, sort them by amount (descending), and print:**\
-  `> list --accounts | sort amount desc | print`
+  `> list --accounts | sort amount dsc | print`
 
 - **Get detailed help for a specific command:**\
   `> help search`
