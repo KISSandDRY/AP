@@ -153,8 +153,8 @@ public final class Deposit implements IStorable, Serializable {
         return "\"" + this.getClass().getName() + "\": {\n" 
                 + "  \"info\": " + info 
                 + ",\n  \"policy\": " + policy 
-                + ",\n  \"strategy\": " + interestStrategy 
-                + ",\n  \"rate\"=" + interestRate + "\n}";
+                + ",\n  \"strategy\": \"" + interestStrategy + "\"" 
+                + ",\n  \"rate\": \"" + interestRate + "\"\n}";
     }
 
 

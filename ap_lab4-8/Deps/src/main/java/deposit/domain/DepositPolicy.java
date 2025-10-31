@@ -33,5 +33,14 @@ public final record DepositPolicy(
         Objects.requireNonNull(amountRange, "Amount range cannot be null.");
         Objects.requireNonNull(termRange, "Term range cannot be null.");
     }
+
+    @Override
+    public String toString() {
+        return "\"" + this.getClass().getName() + "\": { " 
+                + "\"amountRange\": " + amountRange
+                + ", \"termRange\": " + termRange 
+                + ", \"withdraw\": " + canWithdrawEarly
+                + ", \"replenish\": " + canReplenish + " }";
+    }
 }
 

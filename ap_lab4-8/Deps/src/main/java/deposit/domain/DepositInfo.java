@@ -52,10 +52,10 @@ public final record DepositInfo(
      */
     @Override
     public final String toString() {
-        return "\"" + this.getClass().getName() + "\": {\n" 
-                + "  name\":" + depositName 
-                + ",\n  \"bank\":" + bankName 
-                + ",\n  \"currency\":" + currency
-                + ",\n  \"payfreq\":" + payoutFrequency + "\n}";
+        return "\"" + this.getClass().getName() + "\": { " 
+                + "\"name\": " + depositName 
+                + ", \"bank\": " + bankName 
+                + ", \"currency\": " + currency
+                + ", \"payfreq\": " + payoutFrequency + " }";
     }
 }
